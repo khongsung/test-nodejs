@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Đội chơi</title>
+	<script src="socket.io/socket.io.js"></script>
+	<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+	<script>
+		const socket = io('http://localhost:3000');
+	</script>
+	<style>
+		.question {
+			margin: 100px 0;
+		}
+	</style>
+</head>
+<body>
+	<span class="current-user"><%=username%></span>
+	<h1>đây là màn hình đội chơi</h1>
+
+	<span class="coundown"></span>
+
+	<p class="question"></p>
+
+	<script>
+		socket.on("broadcast-all", function(data){
+			$('.question').text(data);
+		});
+
+		socket.on('broadcast-to', function(data) {
+			console.log(data);
+			$('.question').text(data);
+		});	
+
+		socket.emit("current-user", "<%=username%>");
+
+		socket.on("broadcast-to-tests", function(data) {
+			$('.question').text(data);
+		});
+
+		socket.on('countdown', function(data) {
+			$('.coundown').text(data);
+		})
+
+	</script>
+
+</body>
+</html>

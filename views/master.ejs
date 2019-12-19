@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Điều khiển</title>
+	<script src="socket.io/socket.io.js"></script>
+	<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+	<script>
+		const socket = io('http://localhost:3000');
+	</script>
+	<style>
+		.question {
+			margin: 100px 0;
+		}
+	</style>
+</head>
+<body>
+	<span class="current-user"><%=username%></span>
+	<h1>Đây là màn hình điều khiển</h1>
+
+	<div class="list-current-users">
+		<h4>user đang connect</h4>
+		<ul>
+			<li></li>
+		</ul>
+	</div>
+	
+	<span class="coundown"></span>
+
+	<p class="question"></p>
+	
+	<div>
+		<textarea name="question-content" id="question-content" cols="100" rows="10"></textarea>
+	</div>
+
+	<div>
+		<button class="btn-send-question">send all</button>	
+		<button class="btn-send-to-tests">send to các đội chơi</button>
+	</div>
+
+	<div>
+		<button class="btn-send-test" data-value="test1">Gửi đội 1</button>
+		<button class="btn-send-test" data-value="test2">Gửi đội 2</button>
+		<button class="btn-send-test" data-value="test3">Gửi đội 3</button>
+		<button class="btn-send-test" data-value="presentation">presentation</button>
+	</div>
+
+	<script>
+		socket.on("broadcast-all", function(data){
+			$('.question').text(data);
+		});
+		
+		socket.emit("current-user", "<%=username%>");	
+
+		socket.on("list-current-users", function(data) {
+			console.log(data);
+			$('.list-current-users ul').empty();
+			$.each(data, (k,v)=> {
+				$('.list-current-users ul').append('<li>'+k+'</li>');
+			})
+		});
+
+		socket.on("update-list-current-users", function(data) {
+			$('.list-current-users ul').empty();
+			$.each(data, (k,v)=> {
+				$('.list-current-users ul').append('<li>'+k+'</li>');
+			})
+		});
+
+		socket.on('countdown', function(data) {
+			$('.coundown').text(data);
+		})
+
+		$(document).ready(function() {
+			$('.btn-send-question').click(function() {
+				socket.emit('send-question', $('#question-content').val());
+			});
+
+			$('.btn-send-test').click(function() {
+				socket.emit('send-to-test', { sendTo: $(this).data('value'), content:  $('#question-content').val()});
+			});
+
+			$('.btn-send-to-tests').click(function() {
+				socket.emit("send-to-tests", $('#question-content').val());
+			});
+
+		});	
+	</script>
+
+</body>
+</html>
